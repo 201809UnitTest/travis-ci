@@ -13,7 +13,7 @@ class Holiday
     public function sayXmas()
     {
         $today = $this->getToday();
-        if ($today == '12-25') {
+        if ($this->isXmas($today)) {
             return 'Merry Xmas';
         }
 
@@ -26,5 +26,14 @@ class Holiday
     protected function getToday()
     {
         return date('m-d');
+    }
+
+    /**
+     * @param $today
+     * @return bool
+     */
+    private function isXmas($today): bool
+    {
+        return $today == '12-25' || $today == '12-24';
     }
 }
