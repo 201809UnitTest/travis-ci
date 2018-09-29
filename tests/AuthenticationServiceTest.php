@@ -9,6 +9,7 @@
 namespace Tests;
 
 use App\AuthenticationService;
+use App\ILogger;
 use App\IProfile;
 use App\IToken;
 use PHPUnit\Framework\TestCase;
@@ -17,16 +18,21 @@ use Mockery as m;
 
 class AuthenticationServiceTest extends TestCase
 {
+    use MockeryPHPUnitIntegration;
     /** @test */
     private $stubProfile;
     private $stubToken;
     private $target;
+    private $mockLogger;
 
     protected function setUp()
     {
         $this->stubProfile = m::mock(IProfile::class);
         $this->stubToken = m::mock(IToken::class);
-        $this->target = new AuthenticationService($this->stubProfile, $this->stubToken);
+
+        $this->mockLogger = m::mock(ILogger::class);
+
+        $this->target = new AuthenticationService($this->stubProfile, $this->stubToken, $this->mockLogger);
     }
 
     public function test_is_valid()
@@ -35,6 +41,21 @@ class AuthenticationServiceTest extends TestCase
         $this->givenToken('000000');
 
         $this->shouldBeValid('joey', '91000000');
+    }
+
+    public function test_should_log_account_when_invalid()
+    {
+        $this->givenProfile('joey', '91');
+        $this->givenToken('000000');
+
+//        $this->mockLogger->shouldReceive('save')->with('account: joey try to login failed')
+//            ->once();
+
+        $this->mockLogger->shouldReceive('save')->with(m::on(function ($message) {
+            return strpos($message, 'joey') !== false;
+        }))->once();
+
+        $this->target->isValid('joey', 'wrong password');
     }
 
     private function givenProfile($account, $password): void
