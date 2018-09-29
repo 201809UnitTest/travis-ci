@@ -18,21 +18,41 @@ use Mockery as m;
 class AuthenticationServiceTest extends TestCase
 {
     /** @test */
-    public function is_valid_test()
+    private $stubProfile;
+    private $stubToken;
+    private $target;
+
+    protected function setUp()
     {
-        $stubProfile = m::mock(IProfile::class);
-        $stubProfile->shouldReceive('getPassword')
-            ->with('joey')
-            ->andReturn('91');
+        $this->stubProfile = m::mock(IProfile::class);
+        $this->stubToken = m::mock(IToken::class);
+        $this->target = new AuthenticationService($this->stubProfile, $this->stubToken);
+    }
 
-        $stubToken = m::mock(IToken::class);
-        $stubToken->shouldReceive('getRandom')
-            ->andReturn('000000');
+    public function test_is_valid()
+    {
+        $this->givenProfile('joey', '91');
+        $this->givenToken('000000');
 
-        $target = new AuthenticationService($stubProfile,$stubToken);
+        $this->shouldBeValid('joey', '91000000');
+    }
 
-        $actual = $target->isValid('joey', '91000000');
-        $this->assertTrue($actual);
+    private function givenProfile($account, $password): void
+    {
+        $this->stubProfile->shouldReceive('getPassword')
+            ->with($account)
+            ->andReturn($password);
+    }
+
+    private function givenToken($token): void
+    {
+        $this->stubToken->shouldReceive('getRandom')
+            ->andReturn($token);
+    }
+
+    private function shouldBeValid($account, $password): void
+    {
+        $this->assertTrue($this->target->isValid($account, $password));
     }
 }
 
