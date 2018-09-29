@@ -17,17 +17,18 @@ namespace App {
         public function syncBookOrders()
         {
             $orders = $this->getOrders();
+
             // only get orders of book
             $ordersOfBook = array_filter($orders, function ($order) {
                 return $order->type === 'Book';
             });
-            $bookDao = new BookDao();
+            $bookDao = $this->getBookDao();
             foreach ($ordersOfBook as $order) {
                 $bookDao->insert($order);
             }
         }
 
-        private function getOrders()
+        protected function getOrders()
         {
             // parse csv file to get orders
             return array_map(function ($line) {
@@ -45,6 +46,14 @@ namespace App {
 
             return $order;
         }
+
+        /**
+         * @return IBookDao
+         */
+        protected function getBookDao(): IBookDao
+        {
+            return new BookDao();
+        }
     }
 
     class Order
@@ -55,7 +64,7 @@ namespace App {
         public $customerName;
     }
 
-    class BookDao
+    class BookDao implements IBookDao
     {
         public function insert(Order $order)
         {
