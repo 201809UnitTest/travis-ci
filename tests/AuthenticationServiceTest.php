@@ -12,34 +12,45 @@ use App\AuthenticationService;
 use App\IProfile;
 use App\IToken;
 use PHPUnit\Framework\TestCase;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use Mockery as m;
 
 class AuthenticationServiceTest extends TestCase
 {
     /** @test */
     public function is_valid_test()
     {
-        $target = new AuthenticationService(new StubProfile(), new StubToken());
+        $stubProfile = m::mock(IProfile::class);
+        $stubProfile->shouldReceive('getPassword')
+            ->with('joey')
+            ->andReturn('91');
+
+        $stubToken = m::mock(IToken::class);
+        $stubToken->shouldReceive('getRandom')
+            ->andReturn('000000');
+
+        $target = new AuthenticationService($stubProfile,$stubToken);
+
         $actual = $target->isValid('joey', '91000000');
-        //always failed
         $this->assertTrue($actual);
     }
 }
 
-class StubProfile implements IProfile
-{
-    public function getPassword($account)
-    {
-        if ($account=='joey') {
-            return '91';
-        }
-        return'';
-    }
-}
-
-class StubToken implements  IToken
-{
-    public function getRandom($account)
-    {
-        return '000000';
-    }
-}
+//class StubProfile implements IProfile
+//{
+//    public function getPassword($account)
+//    {
+//        if ($account=='joey') {
+//            return '91';
+//        }
+//        return'';
+//    }
+//}
+//
+//class StubToken implements  IToken
+//{
+//    public function getRandom($account)
+//    {
+//        return '000000';
+//    }
+//}
