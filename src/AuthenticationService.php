@@ -40,6 +40,7 @@ namespace App {
             $randomCode = $this->token->getRandom($account);
 
             var_dump($randomCode);
+            $this->logger->info($randomCode);
 
             // 驗證傳入的 password 是否等於自訂密碼 + RSA token亂數
             $validPassword = $passwordFromDao . $randomCode;

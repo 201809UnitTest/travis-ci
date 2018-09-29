@@ -23,6 +23,9 @@ class AuthenticationServiceTest extends TestCase
     private $stubProfile;
     private $stubToken;
     private $target;
+    /**
+     * @var MockInterface
+     */
     private $mockLogger;
 
     protected function setUp()
@@ -30,8 +33,9 @@ class AuthenticationServiceTest extends TestCase
         $this->stubProfile = m::mock(IProfile::class);
         $this->stubToken = m::mock(IToken::class);
 
-        $this->mockLogger = m::mock(ILogger::class);
+//        $this->mockLogger = m::mock(ILogger::class);
 
+        $this->mockLogger = m::spy(ILogger::class);
         $this->target = new AuthenticationService($this->stubProfile, $this->stubToken, $this->mockLogger);
     }
 
@@ -48,14 +52,9 @@ class AuthenticationServiceTest extends TestCase
         $this->givenProfile('joey', '91');
         $this->givenToken('000000');
 
-//        $this->mockLogger->shouldReceive('save')->with('account: joey try to login failed')
-//            ->once();
-
-        $this->mockLogger->shouldReceive('save')->with(m::on(function ($message) {
-            return strpos($message, 'joey') !== false;
-        }))->once();
-
         $this->target->isValid('joey', 'wrong password');
+
+        $this->shouldLog('joey');
     }
 
     private function givenProfile($account, $password): void
@@ -74,6 +73,14 @@ class AuthenticationServiceTest extends TestCase
     private function shouldBeValid($account, $password): void
     {
         $this->assertTrue($this->target->isValid($account, $password));
+    }
+
+    private function shouldLog($account): void
+    {
+        $this->mockLogger->shouldHaveReceived('save')->with(m::on(function ($message) use ($account) {
+//        $this->mockLogger->shouldReceive('save')->with(m::on(function ($message) use ($account) {
+            return strpos($message, $account) !== false;
+        }))->once();
     }
 }
 

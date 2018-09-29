@@ -11,4 +11,6 @@ namespace App;
 interface ILogger
 {
     public function save(string $message);
+
+    public function info(string $randomCode);
 }
