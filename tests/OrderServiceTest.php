@@ -21,21 +21,24 @@ class OrderServiceTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
     /**
-     * @var OrderService
+     * @var MockInterface
      */
     private $target;
     private $spyBookDao;
 
     protected function setUp()
     {
-        $this->target = new OrderServiceForTest();
+        $this->target = m::spy(OrderService::class)->makePartial();
+        $this->target->shouldAllowMockingProtectedMethods();
+
         $this->spyBookDao = m::spy(IBookDao::class);
-        $this->target->setBookDao($this->spyBookDao);
+
+        $this->target->shouldReceive('getBookDao')
+            ->andReturn($this->spyBookDao);
     }
 
     public function test_sync_book_orders_3_orders_only_2_book_order()
     {
-
         $this->givenOrders(['Book', 'CD', 'Book']);
 
         $this->target->syncBookOrders();
@@ -65,7 +68,7 @@ class OrderServiceTest extends TestCase
             $orders[] = $this->createOrder($type);
         }
 
-        $this->target->setOrders($orders);
+        $this->target->shouldReceive('getOrders')->andReturn($orders);
     }
 
     private function bookDaoShouldInsert($times): void
@@ -76,31 +79,31 @@ class OrderServiceTest extends TestCase
     }
 }
 
-class OrderServiceForTest extends OrderService
-{
-    private $orders;
-    private $bookDao;
-
-    public function setBookDao($bookDao)
-    {
-        $this->bookDao = $bookDao;
-    }
-
-    protected function getBookDao(): IBookDao
-    {
-        return $this->bookDao;
-    }
-
-    public function setOrders($orders)
-    {
-        $this->orders = $orders;
-    }
-
-    protected function getOrders()
-    {
-        return $this->orders;
-    }
-}
+//class OrderServiceForTest extends OrderService
+//{
+//    private $orders;
+//    private $bookDao;
+//
+//    public function setBookDao($bookDao)
+//    {
+//        $this->bookDao = $bookDao;
+//    }
+//
+//    protected function getBookDao(): IBookDao
+//    {
+//        return $this->bookDao;
+//    }
+//
+//    public function setOrders($orders)
+//    {
+//        $this->orders = $orders;
+//    }
+//
+//    protected function getOrders()
+//    {
+//        return $this->orders;
+//    }
+//}
 
 
 
