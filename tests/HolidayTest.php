@@ -32,6 +32,12 @@ class HolidayTest extends TestCase
         $this->shouldResponse('Merry Xmas');
     }
 
+    public function test_today_is_not_xmas()
+    {
+        $this->givenToday('11', '24');
+        $this->shouldResponse('Today is not Xmas');
+    }
+
     private function givenToday($month, $day): void
     {
         $this->holiday->setToday($month . '-' . $day);
